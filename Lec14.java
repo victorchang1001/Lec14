@@ -36,6 +36,9 @@ public class Lec14 extends JFrame{
 		JButton pause_button;
 		int pause_flag = 0;
 
+		JSlider velo_slider;
+		JLabel velo;
+
 		public MyJPanel(){
 			setBackground(Color.white);
 			addMouseListener(this);
@@ -66,6 +69,12 @@ public class Lec14 extends JFrame{
 				}
 			});
 			add(pause_button);
+
+//			velo_slider = new JSlider(0, 200, 100);
+//			velo = new JLabel("Velocity");
+//			add(velo);
+//			add(velo_slider);
+
 		}
 		
 		public void paintComponent(Graphics g){
@@ -83,6 +92,7 @@ public class Lec14 extends JFrame{
 			d=getSize();
 			if(pause_flag == 0) {
 				t += 0.2;
+//				v = velo_slider.getValue();
 //-------------------------------------------------------------------
 				my_x = (int) (v * v_x * t + start_x);
 				my_y = (int) (9.8 * t * t / 2 - v * v_y * t + start_y);
@@ -108,7 +118,7 @@ public class Lec14 extends JFrame{
 		{
 			mouse_x = me.getX();
 			mouse_y = me.getY();
-			if((grab_flag==0)&&(my_x<mouse_x)&&(mouse_x<my_x+my_width)&&(my_y<mouse_y)&&(mouse_y<my_y+my_height)){
+			if((pause_flag == 0)&&(grab_flag==0)&&(my_x<mouse_x)&&(mouse_x<my_x+my_width)&&(my_y<mouse_y)&&(mouse_y<my_y+my_height)){
 				grab_flag = 1;
 				start_x = mouse_x;
 				start_y = mouse_y;
@@ -143,7 +153,7 @@ public class Lec14 extends JFrame{
 		
 		public void mouseDragged(MouseEvent me)
 		{
-			if(grab_flag==1){
+			if(grab_flag==1&&(pause_flag == 0)){
 				mouse_x = me.getX();
 				mouse_y = me.getY();
 				my_x = init_x - (start_x-mouse_x);
