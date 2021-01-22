@@ -32,8 +32,8 @@ public class HungryBirds extends JFrame{
 		double v_x, v_y;
 		int my_width, my_height;
 		int grab_flag=0;
-
-//		test change
+		
+//		test delete
 		
 			
 		public MyJPanel(){
