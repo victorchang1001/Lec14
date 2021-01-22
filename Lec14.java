@@ -26,7 +26,7 @@ public class Lec14 extends JFrame{
 	
 	public class MyJPanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 		Timer timer;
-		Image image, star;
+		Image image;
 		int my_x, my_y;
 		int mouse_x, mouse_y;
 		int start_x, start_y;
@@ -40,10 +40,10 @@ public class Lec14 extends JFrame{
 
 		JButton pause_button;
 		int pause_flag = 0;
+		JButton restart_button;
 
-		JSlider velo_slider;
-		JLabel velo;
-
+		int game_stage = 0;
+		Image star, pig;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -59,40 +59,72 @@ public class Lec14 extends JFrame{
 
 			ImageIcon star_icon = new ImageIcon("star.png");
 			star = star_icon.getImage();
+			ImageIcon pig_icon = new ImageIcon("pig.jpg");
+			pig = pig_icon.getImage();
 
-			pause_button = new JButton("PAUSE");
-			pause_button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					Graphics g = getGraphics();
-					g.setColor(Color.black);
-					if (pause_flag == 0) {
-						//PAUSE
-						pause_flag = 1;
-						pause_button.setText("RESUME");
-					} else if (pause_flag == 1) {
-						//PLAY
-						pause_flag = 0;
-						pause_button.setText("PAUSE");
+//			pause_button = new JButton("PAUSE");
+//			pause_button.addActionListener(new ActionListener() {
+//				@Override
+//				public void actionPerformed(ActionEvent e) {
+//					Graphics g = getGraphics();
+//					g.setColor(Color.black);
+//					if (pause_flag == 0) {
+//						//PAUSE
+//						pause_flag = 1;
+//						pause_button.setText("RESUME");
+//					} else if (pause_flag == 1) {
+//						//PLAY
+//						pause_flag = 0;
+//						pause_button.setText("PAUSE");
+//					}
+//				}
+//			});
+//			add(pause_button);
+			if(game_stage == 0) {
+				restart_button = new JButton("RESTART");
+				restart_button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (pause_flag == 0) {
+							my_x = init_x;
+							my_y = init_y;
+							t = 0.0;
+							grab_flag = 0;
+							timer.stop();
+							repaint();
+						}
 					}
-				}
-			});
-			add(pause_button);
-			
-//			velo_slider = new JSlider(0, 200, 100);
-//			velo = new JLabel("Velocity");
-//			add(velo);
-//			add(velo_slider);
+				});
+				add(restart_button);
+			}
+		}
+
+		private Boolean checkHitPig(){
+			if (
+					my_x > 750 &&//pig_x = 750
+					my_x < (750 + 50) &&
+					my_y > 400 &&//pig_y = 400
+					my_y < (400 + 50)
+			){
+				return true;
+			}
+			return false;
 		}
 		
 		public void paintComponent(Graphics g){
 			super.paintComponent(g);
-			g.drawImage(image, my_x, my_y, this);
-			g.drawImage(star, star_x, 87, 50, 50, this);
-			g.setColor(Color.black);
-			g.fillRect(95 + my_width / 2, 400, 10, 100);
-			if (grab_flag == 1) {
-				g.drawLine(95 + my_width / 2, 400, mouse_x, mouse_y);
+			if (game_stage == 0) {
+				g.drawImage(image, my_x, my_y, this);
+				g.drawImage(pig, 750, 400, 50, 50, this);
+				g.setColor(Color.black);
+				g.fillRect(95 + my_width / 2, 400, 10, 100);
+				if (grab_flag == 1) {
+					g.drawLine(95 + my_width / 2, 400, mouse_x, mouse_y);
+				}
+			}
+			if(game_stage == 1){
+				
+				g.drawImage(star, 87, 87, 100, 100, this);
 			}
 
 		}
@@ -107,7 +139,7 @@ public class Lec14 extends JFrame{
 //-------------------------------------------------------------------
 				my_x = (int) (v * v_x * t + start_x);
 				my_y = (int) (9.8 * t * t / 2 - v * v_y * t + start_y);
-				star_x = (int)(750 - v * v_x * t);
+//				star_x = (int)(750 - v * v_x * t);
 //-------------------------------------------------------------------
 				if ((my_x < 0) || (my_x > d.width) || (my_y > d.height) || (my_y < 0)) {
 					timer.stop();
@@ -116,6 +148,15 @@ public class Lec14 extends JFrame{
 					t = 0.0;
 				}
 				grab_flag = 0;
+				if (checkHitPig()){
+					System.out.println("HIT PIG!");
+
+					timer.stop();
+					my_x = init_x;
+					my_y = init_y;
+					t = 0.0;
+					game_stage = 1;
+				}
 				repaint();
 			}
 		}
