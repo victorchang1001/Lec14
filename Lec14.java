@@ -33,8 +33,8 @@ public class Lec14 extends JFrame{
 		int my_width, my_height;
 		int grab_flag=0;
 
-//		JButton pause_button;
-//		int pause_flag = 0;
+		JButton pause_button;
+		int pause_flag = 0;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -48,28 +48,24 @@ public class Lec14 extends JFrame{
 			my_x = init_x;
 			my_y = init_y;
 
-//			pause_button = new JButton("PAUSE");
-//			pause_button.addActionListener(new ActionListener() {
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					Graphics g = getGraphics();
-//					g.setColor(Color.black);
-//					if (pause_flag == 0) {
-//						g.setColor(Color.black);
-//						g.fillRect(87, 187, 87, 87);
-//						g.setColor(Color.white);
-//						g.fillOval(87, 87, 87, 87);
-//						pause_flag = 1;
-//					} else if (pause_flag == 1) {
-//						g.setColor(Color.black);
-//						g.fillOval(87, 87, 87, 87);
-//						g.setColor(Color.white);
-//						g.fillRect(87, 187, 87, 87);
-//						pause_flag = 0;
-//					}
-//				}
-//			});
-//			add(pause_button);
+			pause_button = new JButton("PAUSE");
+			pause_button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					Graphics g = getGraphics();
+					g.setColor(Color.black);
+					if (pause_flag == 0) {
+						//PAUSE
+						pause_flag = 1;
+						pause_button.setText("RESUME");
+					} else if (pause_flag == 1) {
+						//PLAY
+						pause_flag = 0;
+						pause_button.setText("PAUSE");
+					}
+				}
+			});
+			add(pause_button);
 		}
 		
 		public void paintComponent(Graphics g){
@@ -85,19 +81,22 @@ public class Lec14 extends JFrame{
 		public void actionPerformed(ActionEvent e){
 			Dimension d;
 			d=getSize();
-			t+=0.2;
+			if(pause_flag == 0) {
+				t += 0.2;
 //-------------------------------------------------------------------
-			my_x = (int)(v*v_x*t+start_x);
-			my_y = (int)(9.8*t*t/2 - v*v_y*t+start_y);
+				my_x = (int) (v * v_x * t + start_x);
+				my_y = (int) (9.8 * t * t / 2 - v * v_y * t + start_y);
 //-------------------------------------------------------------------
-			if((my_x<0)||(my_x>d.width)||(my_y>d.height)||(my_y<0)){
-				timer.stop();
-				my_x=init_x;
-				my_y=init_y;
-				t=0.0;				
+				if ((my_x < 0) || (my_x > d.width) || (my_y > d.height) || (my_y < 0)) {
+					timer.stop();
+					my_x = init_x;
+					my_y = init_y;
+					t = 0.0;
+				}
+
+				grab_flag = 0;
+				repaint();
 			}
-			grab_flag=0;
-			repaint();
 		}
 		
 		
