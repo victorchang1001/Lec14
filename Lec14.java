@@ -33,7 +33,8 @@ public class Lec14 extends JFrame{
 		int my_width, my_height;
 		int grab_flag=0;
 
-		JButton test_button;
+//		JButton pause_button;
+//		int pause_flag = 0;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -47,17 +48,28 @@ public class Lec14 extends JFrame{
 			my_x = init_x;
 			my_y = init_y;
 
-//			test_button = new JButton("DRAW 87");
-//			test_button.addActionListener(new ActionListener() {
+//			pause_button = new JButton("PAUSE");
+//			pause_button.addActionListener(new ActionListener() {
 //				@Override
 //				public void actionPerformed(ActionEvent e) {
 //					Graphics g = getGraphics();
 //					g.setColor(Color.black);
-//					g.fillRect(87,187, 87, 87);
-//					g.fillOval(87,87, 87, 87);
+//					if (pause_flag == 0) {
+//						g.setColor(Color.black);
+//						g.fillRect(87, 187, 87, 87);
+//						g.setColor(Color.white);
+//						g.fillOval(87, 87, 87, 87);
+//						pause_flag = 1;
+//					} else if (pause_flag == 1) {
+//						g.setColor(Color.black);
+//						g.fillOval(87, 87, 87, 87);
+//						g.setColor(Color.white);
+//						g.fillRect(87, 187, 87, 87);
+//						pause_flag = 0;
+//					}
 //				}
 //			});
-//			add(test_button);
+//			add(pause_button);
 		}
 		
 		public void paintComponent(Graphics g){
