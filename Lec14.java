@@ -25,7 +25,7 @@ public class Lec14 extends JFrame{
 	}
 	
 	public class MyJPanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
-		Timer timer;
+		Timer timer, timer_stage;
 		Image image;
 		int my_x, my_y;
 		int my_life = 3;
@@ -45,6 +45,9 @@ public class Lec14 extends JFrame{
 		Image star, pig, rock, fire, heart;
 		int star_count;
 		int pig_life = 5;
+		int rock_x = 600;
+		int rock_width = 100;
+		int rock_height = 60;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -125,8 +128,21 @@ public class Lec14 extends JFrame{
 		}
 
 		private Boolean checkHitRock(){
-			//撞到樹，-1hp
-			return true;
+			//撞到石頭
+//			if (my_x > rock_x && my_x < (rock_x + rock_width) && my_y > (400 - rock_height) && my_y < 400){
+			if(rock_x < 100 && (my_y + 50 < 400 - rock_height)){
+				System.out.println("HIT ROCK!!!!");
+				return true;
+			}
+			return false;
+		}
+
+		private void moveRock(){
+			rock_x -= 15;
+			//把他依照關卡變快
+			if (rock_x < 50) {
+				rock_x = 800;
+			}
 		}
 
 		
@@ -144,14 +160,16 @@ public class Lec14 extends JFrame{
 
 			if(game_stage == 1){
 				g.fillRect(0, 400, 800, 100);
-				g.fillRect(0, 50, 800, 5);
 				for(int i = 0; i < my_life; i++){
-					g.drawImage(heart, 20*i, 450, this);
+					g.drawImage(heart, 10+35*i, 430,30,20, this);
 				}
-				g.drawImage(star, 87, 87, 100, 100, this);
-				g.drawImage(image, 50, 350, 50, 50, this);
-				g.drawImage(pig, 187, 87, 100, 100, this);
-				g.drawImage(fire, 287, 87, 100, 60, this);
+				g.drawImage(image, my_x, my_y, 50, 50, this);
+
+//				g.drawImage(star, 87, 87, 100, 100, this);
+//				g.drawImage(pig, 187, 87, 100, 100, this);
+//				g.drawImage(fire, 287, 87, 100, 60, this);
+				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);
+
 			}
 
 		}
@@ -160,13 +178,11 @@ public class Lec14 extends JFrame{
 			Dimension d;
 			d=getSize();
 
-			if(pause_flag == 0 ) {
+			if(pause_flag == 0 && (game_stage == 0)) {
 				t += 0.2;
-//				v = velo_slider.getValue();
 //-------------------------------------------------------------------
 				my_x = (int) (v * v_x * t + start_x);
 				my_y = (int) (9.8 * t * t / 2 - v * v_y * t + start_y);
-//				star_x = (int)(750 - v * v_x * t);
 //-------------------------------------------------------------------
 				if ((my_x < 0) || (my_x > d.width) || (my_y > d.height) || (my_y < 0)) {
 					timer.stop();
@@ -179,10 +195,30 @@ public class Lec14 extends JFrame{
 					System.out.println("HIT PIG!");
 
 					timer.stop();
-					my_x = init_x;
-					my_y = init_y;
-					t = 0.0;
+					my_x = 50;
+					my_y = 350;
+//					t = 0.0;
 					game_stage = 1;
+
+					timer_stage = new Timer(100, this);
+					timer_stage.start();
+					restart_button.setVisible(false);
+					pause_button.setVisible(false);
+				}
+				repaint();
+			}
+
+			if((game_stage == 1) && e.getSource() == timer_stage){
+
+				moveRock();
+				System.out.println(rock_x);
+
+				if(checkHitRock()){
+					my_life -= 1;
+					if (my_life == 0){
+						System.out.println("===== Game Over =====");
+						System.exit(0);
+					}
 				}
 				repaint();
 			}
@@ -194,12 +230,14 @@ public class Lec14 extends JFrame{
 		
 		public void mousePressed(MouseEvent me)
 		{
-			mouse_x = me.getX();
-			mouse_y = me.getY();
-			if((pause_flag == 0)&&(grab_flag==0)&&(my_x<mouse_x)&&(mouse_x<my_x+my_width)&&(my_y<mouse_y)&&(mouse_y<my_y+my_height)){
-				grab_flag = 1;
-				start_x = mouse_x;
-				start_y = mouse_y;
+			if(game_stage == 0) {
+				mouse_x = me.getX();
+				mouse_y = me.getY();
+				if ((pause_flag == 0) && (grab_flag == 0) && (my_x < mouse_x) && (mouse_x < my_x + my_width) && (my_y < mouse_y) && (mouse_y < my_y + my_height)) {
+					grab_flag = 1;
+					start_x = mouse_x;
+					start_y = mouse_y;
+				}
 			}
 		}
 		
@@ -248,10 +286,12 @@ public class Lec14 extends JFrame{
 
 				case KeyEvent.VK_UP:
 					my_y += 20;
+					repaint();
 					break;
 
 				case KeyEvent.VK_DOWN:
 					my_y -= 20;
+					repaint();
 					break;
 
 //				default:
