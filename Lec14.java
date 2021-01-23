@@ -28,6 +28,7 @@ public class Lec14 extends JFrame{
 		Timer timer;
 		Image image;
 		int my_x, my_y;
+		int my_life = 3;
 		int mouse_x, mouse_y;
 		int start_x, start_y;
 		int init_x=100, init_y=375;
@@ -36,14 +37,14 @@ public class Lec14 extends JFrame{
 		int my_width, my_height;
 		int grab_flag=0;
 
-		int star_x = 750;
-
 		JButton pause_button;
 		int pause_flag = 0;
 		JButton restart_button;
 
 		int game_stage = 0;
-		Image star, pig;
+		Image star, pig, rock, fire, heart;
+		int star_count;
+		int pig_life = 5;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -61,42 +62,49 @@ public class Lec14 extends JFrame{
 			star = star_icon.getImage();
 			ImageIcon pig_icon = new ImageIcon("pig.jpg");
 			pig = pig_icon.getImage();
+			ImageIcon rock_icon = new ImageIcon("rock.png");
+			rock = rock_icon.getImage();
+			ImageIcon fire_icon = new ImageIcon("fire.png");
+			fire = fire_icon.getImage();
+			ImageIcon heart_icon = new ImageIcon("heart.jpg");
+			heart = heart_icon.getImage();
 
-//			pause_button = new JButton("PAUSE");
-//			pause_button.addActionListener(new ActionListener() {
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					Graphics g = getGraphics();
-//					g.setColor(Color.black);
-//					if (pause_flag == 0) {
-//						//PAUSE
-//						pause_flag = 1;
-//						pause_button.setText("RESUME");
-//					} else if (pause_flag == 1) {
-//						//PLAY
-//						pause_flag = 0;
-//						pause_button.setText("PAUSE");
-//					}
-//				}
-//			});
-//			add(pause_button);
-			if(game_stage == 0) {
-				restart_button = new JButton("RESTART");
-				restart_button.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						if (pause_flag == 0) {
-							my_x = init_x;
-							my_y = init_y;
-							t = 0.0;
-							grab_flag = 0;
-							timer.stop();
-							repaint();
-						}
+			pause_button = new JButton("PAUSE");
+			pause_button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					Graphics g = getGraphics();
+					g.setColor(Color.black);
+					if (pause_flag == 0) {
+						//PAUSE
+						pause_flag = 1;
+						pause_button.setText("RESUME");
+					} else if (pause_flag == 1) {
+						//PLAY
+						pause_flag = 0;
+						pause_button.setText("PAUSE");
 					}
-				});
-				add(restart_button);
-			}
+				}
+			});
+			add(pause_button);
+
+			restart_button = new JButton("RESTART");
+			restart_button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (pause_flag == 0 && (game_stage == 0)) {
+						my_x = init_x;
+						my_y = init_y;
+						t = 0.0;
+						grab_flag = 0;
+						timer.stop();
+						repaint();
+					}
+
+				}
+			});
+			add(restart_button);
+
 		}
 
 		private Boolean checkHitPig(){
@@ -110,10 +118,21 @@ public class Lec14 extends JFrame{
 			}
 			return false;
 		}
+
+		private Boolean checkEatStar(){
+			//吃星星，+1pt
+			return true;
+		}
+
+		private Boolean checkHitRock(){
+			//撞到樹，-1hp
+			return true;
+		}
+
 		
 		public void paintComponent(Graphics g){
 			super.paintComponent(g);
-			if (game_stage == 0) {
+			if(game_stage == 0) {
 				g.drawImage(image, my_x, my_y, this);
 				g.drawImage(pig, 750, 400, 50, 50, this);
 				g.setColor(Color.black);
@@ -122,9 +141,17 @@ public class Lec14 extends JFrame{
 					g.drawLine(95 + my_width / 2, 400, mouse_x, mouse_y);
 				}
 			}
+
 			if(game_stage == 1){
-				
+				g.fillRect(0, 400, 800, 100);
+				g.fillRect(0, 50, 800, 5);
+				for(int i = 0; i < my_life; i++){
+					g.drawImage(heart, 20*i, 450, this);
+				}
 				g.drawImage(star, 87, 87, 100, 100, this);
+				g.drawImage(image, 50, 350, 50, 50, this);
+				g.drawImage(pig, 187, 87, 100, 100, this);
+				g.drawImage(fire, 287, 87, 100, 60, this);
 			}
 
 		}
