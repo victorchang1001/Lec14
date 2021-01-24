@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class Lec14 extends JFrame{
 	
@@ -45,8 +46,9 @@ public class Lec14 extends JFrame{
 		JButton pause_button;
 		int pause_flag = 0;
 		JButton restart_button;
+		JButton skip_button;
 
-		//text here
+		//text used in game
 		JTextArea explain_before;
 		JTextArea explain_after;
 		JTextArea game_over;
@@ -92,7 +94,7 @@ public class Lec14 extends JFrame{
 			my_x = init_x;
 			my_y = init_y;
 
-			//加一堆圖片區
+			//import images
 			ImageIcon star_icon = new ImageIcon("star.png");
 			star = star_icon.getImage();
 			ImageIcon pig_icon = new ImageIcon("pig.jpg");
@@ -104,42 +106,48 @@ public class Lec14 extends JFrame{
 			ImageIcon heart_icon = new ImageIcon("heart.jpg");
 			heart = heart_icon.getImage();
 
-			//小遊戲說明
-			explain_before = new JTextArea("Drag and launch the bird and hit the pig to start the game!");
+			//before game instructions
+			explain_before = new JTextArea("Launch the bird to hit the pig and enter the main game!\n" +
+					"Change something: (1) pause button\n" +
+					"Change something: (2) restart button\n" +
+					"Change something: (3) skip button\n" +
+					"Change something: (4) main game following\n" +
+					"Functionalities related to Lec5: sort final score\n" +
+					"Click anywhere or drag the bird to start the game");
 			explain_before.setBounds(100, 100, 600, 300);
 			add(explain_before);
 
-			//主遊戲說明
+			//main game instructions
 			explain_after = new JTextArea("Press SPACE to jump.\n" +
 					"(Press UP/DOWN to move upwards/downwards too.)\n" +
 					"Press F to fire.\n" +
 					"Avoid as many rocks as you can.\n" +
-					"Shoot at the star (F) to heal 1 heart." +
-					"You have three tries, 5hp each.\n" +
+					"Shoot (F) at the star to heal 1 heart." +
+					"You have three tries, 3 hp each game.\n" +
 					"Press ENTER to start the game!");
 			explain_after.setBounds(100, 100, 600, 300);
 			add(explain_after);
 			explain_after.setVisible(false);
 
-			//遊戲中間說明
+			//say game over
 			game_over = new JTextArea("Game Over. Press ENTER to continue.");
 			game_over.setBounds(100, 100, 600, 300);
 			add(game_over);
 			game_over.setVisible(false);
 
-			//中間報分數
+			//show current game score
 			score = new JTextArea("Score");
 			score.setBounds(100, 100, 600, 300);
 			add(score);
 			score.setVisible(false);
 
-			//最終分數(sorted)
+			//show final score
 			score_final = new JTextArea("Score final");
 			score_final.setBounds(100, 100, 600, 300);
 			add(score_final);
 			score_final.setVisible(false);
 
-			//暫停按鈕
+			//pause button
 			pause_button = new JButton("PAUSE");
 			pause_button.addActionListener(new ActionListener() {
 				@Override
@@ -159,12 +167,17 @@ public class Lec14 extends JFrame{
 			});
 			add(pause_button);
 
-			//重新丟鳥鳥按鈕
+			//restart button
 			restart_button = new JButton("RESTART");
 			restart_button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (pause_flag == 0 && (game_stage == 0)) {
+					if (game_stage == 0) {
+						if (pause_flag == 1) {
+							//PAUSE condition, restart
+							pause_flag = 0;
+							pause_button.setText("PAUSE");
+						}
 						my_x = init_x;
 						my_y = init_y;
 						t = 0.0;
@@ -177,6 +190,28 @@ public class Lec14 extends JFrame{
 			});
 			add(restart_button);
 
+			skip_button = new JButton("SKIP");
+			skip_button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					timer = new Timer(100, this);
+					timer.start();
+					timer.stop();
+					my_x = 50;
+					my_y = 350;
+
+					game_stage = 1;
+
+					restart_button.setVisible(false);
+					pause_button.setVisible(false);
+					skip_button.setVisible(false);
+					explain_before.setVisible(false);
+					explain_after.setVisible(true);
+					repaint();
+				}
+			});
+			add(skip_button);
+
 		}
 
 		private Boolean checkHitPig(){
@@ -186,21 +221,18 @@ public class Lec14 extends JFrame{
 					my_y < (400 + 50);
 		}
 
-//		private Boolean checkEatStar(){
-//			//吃星星，+1hp
-//			return true;
-//		}
-
-
 		private Boolean checkHitRock(){
 			//hit rock?
-			return rock_x < 90 && (my_y + 50 > 400 - rock_height);
+			Rectangle my_rect = new Rectangle(my_x, my_y, 50, 50);//50x50bird
+			Rectangle rock_rect = new Rectangle(rock_x, (400-rock_height), rock_width, rock_height);
+			return my_rect.intersects(rock_rect);
+//			return rock_x < 90 && (my_y + 50 > 400 - rock_height);
 		}
 
 		private void moveRock(){
-			rock_velo = 10 + rock_count[play_num]/3;
+			rock_velo = 10 + rock_count[play_num]/2;
 			rock_x -= rock_velo;
-			//speed up according to rock avoided
+			//speed up according to #rock avoided
 			if (rock_x + rock_width < 0) {
 				rock_x = 800;
 				rock_count[play_num] += 1;
@@ -208,7 +240,10 @@ public class Lec14 extends JFrame{
 		}
 
 		private void moveStar(){
-			star_x -= star_velo;
+			Random r = new Random();
+			int rand = r.ints(0, 4).findFirst().getAsInt();
+
+			star_x -= star_velo*rand;
 			if (star_x+star_size < 0) {
 				star_x = 800;
 			}
@@ -234,9 +269,19 @@ public class Lec14 extends JFrame{
 			}
 		}
 
+		private void resetFire(){
+			if(fire_flag == 1){
+				fire_x = 100;
+				fire_y = 500;
+				fire_flag = 0;
+			}
+		}
+
+
+
 		private void moveFire(){
 			if(fire_flag == 1){
-				fire_x += 15;
+				fire_x += 30;
 				if(fire_x > 800){
 					fire_flag = 0;
 				}
@@ -244,7 +289,9 @@ public class Lec14 extends JFrame{
 		}
 
 		private Boolean checkHitStar(){
-			return (fire_x+90 > star_x) && (fire_y > star_y) && (fire_y < star_y+star_size);
+			Rectangle fire_rect = new Rectangle(fire_x, fire_y, 60, 30);//60x30fire
+			Rectangle star_rect = new Rectangle(star_x, star_y, star_size, star_size);//
+			return fire_rect.intersects(star_rect);
 		}
 
 		public void paintComponent(Graphics g){
@@ -267,7 +314,7 @@ public class Lec14 extends JFrame{
 					g.drawImage(heart, 10+35*i, 430,30,20, this);
 				}
 				//draw bird
-				g.drawImage(image, my_x, my_y, 50, 50, this);
+				g.drawImage(image, my_x, my_y, 50, 50, this);//50x50bird
 				//draw rock (moving)
 				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);//60x40 rock
 				//draw star (moving)
@@ -275,7 +322,7 @@ public class Lec14 extends JFrame{
 
 				//draw fire
 				if(fire_flag == 1){
-					g.drawImage(fire, fire_x, fire_y, 75, 40, this);//fire75x40
+					g.drawImage(fire, fire_x, fire_y, 60, 30, this);//fire60x30
 				}
 			}
 		}
@@ -284,7 +331,7 @@ public class Lec14 extends JFrame{
 			Dimension d;
 			d=getSize();
 
-			//開始前畫面
+			//before game, template
 			if(pause_flag == 0 && (game_stage == 0)) {
 				t += 0.2;
 //-------------------------------------------------------------------
@@ -299,23 +346,22 @@ public class Lec14 extends JFrame{
 				}
 				grab_flag = 0;
 				if (checkHitPig()){
-					System.out.println("HIT PIG!");
-
 					timer.stop();
 					my_x = 50;
 					my_y = 350;
-//					t = 0.0;
+
 					game_stage = 1;
 
 					restart_button.setVisible(false);
 					pause_button.setVisible(false);
+					skip_button.setVisible(false);
 					explain_before.setVisible(false);
 					explain_after.setVisible(true);
 				}
 				repaint();
 			}
 
-			//主遊戲區
+			//main game
 			if((game_stage == 1) && e.getSource() == timer_game){
 
 				moveRock();
@@ -328,33 +374,48 @@ public class Lec14 extends JFrame{
 					rock_x = 800;
 					my_life -= 1;
 					if (my_life == 0){
-						score.setText("Rocks avoided: " + rock_count[play_num]);
 						if(play_num == 2){
+							score.setText("\nGame over." +
+									"\nGame 1: " + rock_count[0] +" rocks!"+
+									"\nGame 2: " + rock_count[1] +" rocks!"+
+									"\nGame 3: " + rock_count[2]+" rocks!");
+							score.setVisible(true);
+
+							//Lec5: sort algorithm
+							//Sort scores of three games and show them in order
 							Quick quick = new Quick();
 							quick.sort(rock_count);
-							score_final.setText("\nGame over." +
-									"\nBest score: " + rock_count[2] +
+							score_final.setText("\nPress ENTER to end game." +
+									"\nBEST score: " + rock_count[2] +
 									"\nSecond best score: " + rock_count[1] +
 									"\nWorst score: " + rock_count[0]);
-
+							score_final.setVisible(true);
 
 							System.out.println("===== Game Over =====");
-							score_final.setVisible(true);
-//							System.exit(0);
+							play_num = 10;
+							timer_game.stop();
+							Thread t1 = new MyThread();
+							t1.start();
+
+
 						}
+
+						score.setText("Rocks avoided: " + rock_count[play_num]);
 						timer_game.stop();
 						game_over.setVisible(true);
 						score.setVisible(true);
 
-						my_life = 3;//重新開始時的生命
+						my_life = 3;//restart life
 						play_num += 1;
 
 					}
 				}
 				if(checkHitStar()){
-//					fire_flag = 0;
+					resetFire();
 					star_x = 800;
-					my_life += 1;
+					if(my_life < 3){
+						my_life += 1;
+					}
 				}
 
 				repaint();
@@ -426,7 +487,11 @@ public class Lec14 extends JFrame{
 						game_over.setVisible(false);
 						score.setVisible(false);
 
+//						if(play_num == 10){
+//							System.exit(0);
+//						}
 						break;
+
 					}
 					break;
 
@@ -437,8 +502,8 @@ public class Lec14 extends JFrame{
 					break;
 
 				case KeyEvent.VK_UP:
-					if(my_y == 350){
-						my_y -= 100;
+					if(my_y < 300){
+						my_y -= 20;
 					}
 					break;
 
@@ -469,7 +534,7 @@ public class Lec14 extends JFrame{
 		public void keyTyped(KeyEvent e){
 		}
 
-		class Quick{
+		class Quick{//used for quick sort (Lec. 5)
 			public int compareCounter;
 			public int swapCounter;
 			public int swapIndex;
@@ -509,6 +574,16 @@ public class Lec14 extends JFrame{
 				sort(A, left, swapIndex - 1);
 				sort(A, swapIndex + 1, right);
 
+			}
+		}
+
+		class MyThread extends Thread {
+			public void run(){
+				try {
+					sleep(10000);
+					System.exit(0);
+				} catch(InterruptedException e){
+				}
 			}
 		}
 
