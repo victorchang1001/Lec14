@@ -57,8 +57,9 @@ public class Lec14 extends JFrame{
 		int fire_flag = 0;
 
 		int rock_x = 800;
-		int rock_width = 80;
-		int rock_height = 60;
+		int rock_width = 60;
+		int rock_height = 40;
+		int rock_count = 0;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -151,10 +152,11 @@ public class Lec14 extends JFrame{
 		}
 
 		private void moveRock(){
-			rock_x -= 10;
-			//把他依照關卡變快
-			if (rock_x < 50) {
+			rock_x -= (10 + rock_count/10);
+			//依照石頭數變快
+			if (rock_x + rock_width < 0) {
 				rock_x = 800;
+				rock_count += 1;
 			}
 		}
 
@@ -165,8 +167,15 @@ public class Lec14 extends JFrame{
 			}
 		}
 
+//		private void upBird(){
+//			if(my_y > 250){
+//				my_y -= (int)(5+1.2*my_y/350);
+//			}
+//		}
+
 		private void gravityBird(){
 			if(my_y < 350){
+//				my_y += (int)(5+1.2*my_y/350);
 				my_y += 2.5;
 				if(my_y > 350){
 					my_y = 350;
@@ -226,7 +235,7 @@ public class Lec14 extends JFrame{
 				//draw bird
 				g.drawImage(image, my_x, my_y, 50, 50, this);
 				//draw rock (moving)
-				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);
+				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);//60x40 rock
 				//draw pig (moving)
 				if(pig_life > 0){
 					g.drawImage(pig, pig_x, (400-pig_size), pig_size, pig_size, this);
@@ -280,6 +289,7 @@ public class Lec14 extends JFrame{
 				gravityBird();
 				movePig();
 				moveFire();
+				System.out.println(rock_count);
 
 				repaint();
 				if(checkHitRock()){
@@ -359,20 +369,22 @@ public class Lec14 extends JFrame{
 			switch (keycode) {
 				case KeyEvent.VK_SPACE:
 					my_y -= 100;
+//					upBird();
 					break;
 
 				case KeyEvent.VK_UP:
 					my_y -= 100;
+//					upBird();
 					break;
 
-				case KeyEvent.VK_DOWN:
-					if(my_y < 350) {
-						my_y += 20;
-						if (my_y > 350){
-							my_y = 350;
-						}
-					}
-					break;
+//				case KeyEvent.VK_DOWN:
+//					if(my_y < 350) {
+//						my_y += 20;
+//						if (my_y > 350){
+//							my_y = 350;
+//						}
+//					}
+//					break;
 
 				default:
 					switch (keychar){
