@@ -23,7 +23,7 @@ public class Lec14 extends JFrame{
 	public static void main(String[] args){
 		new Lec14();
 	}
-	
+
 	public class MyJPanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 		Timer timer, timer_stage;
 		Image image;
@@ -42,18 +42,31 @@ public class Lec14 extends JFrame{
 		JButton restart_button;
 
 		int game_stage = 0;
+
 		Image star, pig, rock, fire, heart;
 		int star_count;
-		int pig_life = 5;
-		int rock_x = 600;
-		int rock_width = 100;
+		int star_x[] = new int[3];
+
+		int pig_life = 3;
+		int pig_x = 800;
+		int pig_velo = 5;
+		int pig_size = 200;
+
+		int fire_x = 100;
+		int fire_y = 50;
+		int fire_flag = 0;
+
+		int rock_x = 800;
+		int rock_width = 80;
 		int rock_height = 60;
 
 		public MyJPanel(){
 			setBackground(Color.white);
 			addMouseListener(this);
 			addMouseMotionListener(this);
-			
+			setFocusable(true);
+			addKeyListener(this);
+
 			ImageIcon icon = new ImageIcon("bird.jpg");
 			image = icon.getImage();
 			my_width = image.getWidth(this);
@@ -130,7 +143,7 @@ public class Lec14 extends JFrame{
 		private Boolean checkHitRock(){
 			//撞到石頭
 //			if (my_x > rock_x && my_x < (rock_x + rock_width) && my_y > (400 - rock_height) && my_y < 400){
-			if(rock_x < 100 && (my_y + 50 < 400 - rock_height)){
+			if(rock_x < 90 && (my_y + 50 > 400 - rock_height)){
 				System.out.println("HIT ROCK!!!!");
 				return true;
 			}
@@ -138,16 +151,61 @@ public class Lec14 extends JFrame{
 		}
 
 		private void moveRock(){
-			rock_x -= 15;
+			rock_x -= 10;
 			//把他依照關卡變快
 			if (rock_x < 50) {
 				rock_x = 800;
 			}
 		}
 
+		private void movePig(){
+			pig_x -= pig_velo;
+			if (pig_x < 50) {
+				pig_x = 800;
+			}
+		}
+
+		private void gravityBird(){
+			if(my_y < 350){
+				my_y += 2.5;
+				if(my_y > 350){
+					my_y = 350;
+				}
+				if(my_y < 250){
+					my_y = 250;
+				}
+			}
+		}
+
+		private void activateFire(){
+			if(fire_flag == 0){
+				fire_x = 100;
+				fire_y = my_y;
+				fire_flag = 1;
+			}
+		}
+
+		private void moveFire(){
+			if(fire_flag == 1){
+				fire_x += 15;
+				if(fire_x > 800){
+					fire_flag = 0;
+				}
+			}
+		}
+
+		private Boolean fireHitPig(){
+			if((fire_x + 90 > pig_x) && (fire_y > 400-pig_size)){
+//				fire_flag = 0;
+//				pig_velo += 5;
+//				pig_size -= 40;
+				return true;
+			}
+			return false;
+		}
 		
 		public void paintComponent(Graphics g){
-			super.paintComponent(g);
+			super.paintComponent(g);//reset graphics
 			if(game_stage == 0) {
 				g.drawImage(image, my_x, my_y, this);
 				g.drawImage(pig, 750, 400, 50, 50, this);
@@ -159,19 +217,27 @@ public class Lec14 extends JFrame{
 			}
 
 			if(game_stage == 1){
+				//draw ground
 				g.fillRect(0, 400, 800, 100);
+				//draw heart (life)
 				for(int i = 0; i < my_life; i++){
 					g.drawImage(heart, 10+35*i, 430,30,20, this);
 				}
+				//draw bird
 				g.drawImage(image, my_x, my_y, 50, 50, this);
-
-//				g.drawImage(star, 87, 87, 100, 100, this);
-//				g.drawImage(pig, 187, 87, 100, 100, this);
-//				g.drawImage(fire, 287, 87, 100, 60, this);
+				//draw rock (moving)
 				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);
+				//draw pig (moving)
+				if(pig_life > 0){
+					g.drawImage(pig, pig_x, (400-pig_size), pig_size, pig_size, this);
+				}
+				//draw fire
+				if(fire_flag == 1){
+					g.drawImage(fire, fire_x, fire_y, 75, 40, this);
+				}
+//				g.drawImage(star, 87, 87, 100, 100, this);
 
 			}
-
 		}
 		
 		public void actionPerformed(ActionEvent e){
@@ -200,7 +266,7 @@ public class Lec14 extends JFrame{
 //					t = 0.0;
 					game_stage = 1;
 
-					timer_stage = new Timer(100, this);
+					timer_stage = new Timer(25, this);
 					timer_stage.start();
 					restart_button.setVisible(false);
 					pause_button.setVisible(false);
@@ -211,16 +277,27 @@ public class Lec14 extends JFrame{
 			if((game_stage == 1) && e.getSource() == timer_stage){
 
 				moveRock();
-				System.out.println(rock_x);
+				gravityBird();
+				movePig();
+				moveFire();
 
+				repaint();
 				if(checkHitRock()){
+					rock_x = 800;
 					my_life -= 1;
 					if (my_life == 0){
 						System.out.println("===== Game Over =====");
 						System.exit(0);
 					}
 				}
+				if(fireHitPig()&&fire_flag == 1){
+					pig_life -= 1;
+					fire_flag = 0;
+					System.out.println(pig_life);
+				}
+
 				repaint();
+
 			}
 		}
 
@@ -258,11 +335,9 @@ public class Lec14 extends JFrame{
 		public void mouseExited(MouseEvent me)
 		{
 		}
-		
 		public void mouseEntered(MouseEvent me)
 		{
 		}
-		
 		public void mouseMoved(MouseEvent me)
 		{
 		}
@@ -277,30 +352,35 @@ public class Lec14 extends JFrame{
 				repaint();
 			}
 		}
+
 		public void keyPressed(KeyEvent me) {
 			int keycode = me.getKeyCode();
-//			char keychar = me.getKeyChar();
+			char keychar = me.getKeyChar();
 			switch (keycode) {
-//				case KeyEvent.VK_ENTER:
-//					break;
+				case KeyEvent.VK_SPACE:
+					my_y -= 100;
+					break;
 
 				case KeyEvent.VK_UP:
-					my_y += 20;
-					repaint();
+					my_y -= 100;
 					break;
 
 				case KeyEvent.VK_DOWN:
-					my_y -= 20;
-					repaint();
+					if(my_y < 350) {
+						my_y += 20;
+						if (my_y > 350){
+							my_y = 350;
+						}
+					}
 					break;
 
-//				default:
-//					switch (keychar){
-//						case 'x':
-//
-//							break;
-//					}
-//					break;
+				default:
+					switch (keychar){
+						case 'f':
+							activateFire();
+							break;
+					}
+					break;
 //				case KeyEvent.VK_X:
 //					activateMyMissile();
 //					break;
