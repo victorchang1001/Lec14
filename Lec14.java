@@ -6,6 +6,10 @@ import javax.swing.text.JTextComponent;
 import java.awt.Image;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Lec14 extends JFrame{
 	
@@ -22,8 +26,6 @@ public class Lec14 extends JFrame{
 	}
 	
 	public static void main(String[] args){
-//		int difficulty = Integer.parseInt(args[0]);
-//		System.out.println("Enter desired difficulty/難易度 (low)0~5(high):");
 		new Lec14();
 	}
 
@@ -54,14 +56,17 @@ public class Lec14 extends JFrame{
 		int game_stage = 0;
 		int play_num = 0;
 
-		Image star, pig, rock, fire, heart, arrow;
-		int star_count[] = {0, 0, 0};
-		int star_x[] = new int[3];
+		Image star, pig, rock, fire, heart;
 
-		int pig_life = 3;
-		int pig_x = 800;
-		int pig_velo = 5;
-		int pig_size = 200;
+		int star_x = 800;
+		int star_y = 260;
+		int star_size = 50; //50x50star
+		int star_velo = 15;
+
+//		int pig_life = 3;
+//		int pig_x = 800;
+//		int pig_velo = 5;
+//		int pig_size = 200;
 
 		int fire_x = 100;
 		int fire_y = 50;
@@ -72,10 +77,6 @@ public class Lec14 extends JFrame{
 		int rock_height = 40;
 		int rock_count[] = {0, 0, 0};
 		int rock_velo = 10;
-
-		int arrow_x = 800;
-		int arrow_y = 260;
-		int arrow_velo = 0;
 
 		public MyJPanel(){
 			setBackground(Color.white);
@@ -102,8 +103,6 @@ public class Lec14 extends JFrame{
 			fire = fire_icon.getImage();
 			ImageIcon heart_icon = new ImageIcon("heart.jpg");
 			heart = heart_icon.getImage();
-			ImageIcon arrow_icon = new ImageIcon("arrow.png");
-			arrow = arrow_icon.getImage();
 
 			//小遊戲說明
 			explain_before = new JTextArea("Drag and launch the bird and hit the pig to start the game!");
@@ -112,10 +111,12 @@ public class Lec14 extends JFrame{
 
 			//主遊戲說明
 			explain_after = new JTextArea("Press SPACE to jump.\n" +
-					"Press F to shoot fire.\n" +
-					"Avoid the rock and shoot the pig to win!\n" +
-					"Press ENTER to start the game!\n" +
-					"You have three tries. Eat as many stars as you can!");
+					"(Press UP/DOWN to move upwards/downwards too.)\n" +
+					"Press F to fire.\n" +
+					"Avoid as many rocks as you can.\n" +
+					"Shoot at the star (F) to heal 1 heart." +
+					"You have three tries, 5hp each.\n" +
+					"Press ENTER to start the game!");
 			explain_after.setBounds(100, 100, 600, 300);
 			add(explain_after);
 			explain_after.setVisible(false);
@@ -179,48 +180,37 @@ public class Lec14 extends JFrame{
 		}
 
 		private Boolean checkHitPig(){
-			if (
-					my_x > 750 &&//pig_x = 750
+			return my_x > 750 &&//pig_x = 750
 					my_x < (750 + 50) &&
 					my_y > 400 &&//pig_y = 400
-					my_y < (400 + 50)
-			){
-				return true;
-			}
-			return false;
+					my_y < (400 + 50);
 		}
 
 //		private Boolean checkEatStar(){
-//			//吃星星，+1pt
+//			//吃星星，+1hp
 //			return true;
 //		}
 
+
 		private Boolean checkHitRock(){
-			//撞到石頭
-//			if (my_x > rock_x && my_x < (rock_x + rock_width) && my_y > (400 - rock_height) && my_y < 400){
-			if(rock_x < 90 && (my_y + 50 > 400 - rock_height)){
-				System.out.println("HIT ROCK!!!!");
-				return true;
-			}
-			return false;
+			//hit rock?
+			return rock_x < 90 && (my_y + 50 > 400 - rock_height);
 		}
 
 		private void moveRock(){
 			rock_velo = 10 + rock_count[play_num]/5;
 			rock_x -= rock_velo;
-			//依照石頭數變快
+			//speed up according to rock avoided
 			if (rock_x + rock_width < 0) {
 				rock_x = 800;
 				rock_count[play_num] += 1;
 			}
 		}
 
-		private void movePig(){
-			if(pig_life > 0){
-				pig_x -= pig_velo;
-				if (pig_x+pig_size < 0) {
-					pig_x = 800;
-				}
+		private void moveStar(){
+			star_x -= star_velo;
+			if (star_x+star_size < 0) {
+				star_x = 800;
 			}
 		}
 
@@ -253,29 +243,10 @@ public class Lec14 extends JFrame{
 			}
 		}
 
-		private Boolean fireHitPig(){
-			if((fire_x + 90 > pig_x) && (fire_y > 400-pig_size)){
-				return true;
-			}
-			return false;
+		private Boolean checkHitStar(){
+			return (fire_x+90 > star_x) && (fire_y > star_y) && (fire_y < star_y+star_size);
 		}
 
-//		private void moveArrow(){
-//			//generate random speed for arrow
-////			arrow_velo = ThreadLocalRandom.current().nextInt(20, 50);
-//			arrow_velo = 20;
-//			arrow_x -= arrow_velo;
-//			if (arrow_x+50 < 0) {
-//				arrow_x = 800;
-//			}
-//		}
-
-//		private Boolean checkHitArrow(){
-//			return false;
-//		}
-
-
-		
 		public void paintComponent(Graphics g){
 			super.paintComponent(g);//reset graphics
 			if(game_stage == 0) {
@@ -299,17 +270,13 @@ public class Lec14 extends JFrame{
 				g.drawImage(image, my_x, my_y, 50, 50, this);
 				//draw rock (moving)
 				g.drawImage(rock, rock_x, (400-rock_height), rock_width, rock_height, this);//60x40 rock
-				//draw pig (moving)
-				if(pig_life > 0){
-					g.drawImage(pig, pig_x, (400-pig_size), pig_size, pig_size, this);
-				}
+				//draw star (moving)
+				g.drawImage(star, star_x, star_y, star_size, star_size, this);
+
 				//draw fire
 				if(fire_flag == 1){
 					g.drawImage(fire, fire_x, fire_y, 75, 40, this);
 				}
-				//draw arrow(moving)
-//				g.drawImage(arrow, arrow_x, arrow_y, 50, 25, this);
-
 			}
 		}
 		
@@ -353,12 +320,7 @@ public class Lec14 extends JFrame{
 
 				moveRock();
 				gravityBird();
-				if (pig_life > 0){
-					movePig();
-				}else{
-					pig_x = 800;
-				}
-
+				moveStar();
 				moveFire();
 				repaint();
 
@@ -368,10 +330,16 @@ public class Lec14 extends JFrame{
 					if (my_life == 0){
 						score.setText("Rocks avoided: " + rock_count[play_num]);
 						if(play_num == 2){
+							Quick quick = new Quick();
+							quick.sort(rock_count);
+							score_final.setText("\nGame over." +
+									"\nBest score: " + rock_count[2] +
+									"\nSecond best score: " + rock_count[1] +
+									"\nWorst score: " + rock_count[0]);
+
 
 							System.out.println("===== Game Over =====");
-							score_final.setText("Gameover.");
-							score.setVisible(true);
+							score_final.setVisible(true);
 //							System.exit(0);
 						}
 						timer_game.stop();
@@ -383,10 +351,12 @@ public class Lec14 extends JFrame{
 
 					}
 				}
-				if(fireHitPig()&&fire_flag == 1){
-					pig_life -= 1;
+				if(checkHitStar()){
 					fire_flag = 0;
-					System.out.println(pig_life);
+					star_x = 800;
+					if(my_life < 5){
+						my_life += 1;
+					}
 				}
 
 				repaint();
@@ -469,7 +439,9 @@ public class Lec14 extends JFrame{
 					break;
 
 				case KeyEvent.VK_UP:
-					my_y -= 100;
+					if(my_y == 350){
+						my_y -= 100;
+					}
 					break;
 
 				case KeyEvent.VK_DOWN:
@@ -498,5 +470,49 @@ public class Lec14 extends JFrame{
 		}
 		public void keyTyped(KeyEvent e){
 		}
+
+		class Quick{
+			public int compareCounter;
+			public int swapCounter;
+			public int swapIndex;
+			public int pivot;
+
+			public void swap(int[] A, int i, int j){
+				this.swapCounter++;
+				int tmp = A[i];
+				A[i] = A[j];
+				A[j] = tmp;
+			}
+			public void compareAndSwap(int[] A, int i){
+				this.compareCounter++;
+				if (A[i] <= this.pivot)
+					swap(A, i, this.swapIndex++);
+			}
+
+			public void sort(int[] A){
+				sort(A, 0, A.length - 1);
+			}
+
+			public void sort(int[] A, int left, int right) {
+				this.compareCounter=0;
+				this.swapCounter=0;
+
+				if (right <= left)  return;
+
+				int pivotIndex = (left + right) / 2;
+				this.pivot = A[pivotIndex];
+				swap(A, pivotIndex, right);
+				this.swapIndex = left;
+				for(int i = left; i < right; ++i){
+					compareAndSwap(A, i);
+				}
+				swap(A, swapIndex, right);
+
+				sort(A, left, swapIndex - 1);
+				sort(A, swapIndex + 1, right);
+
+			}
+		}
+
 	}
 }
