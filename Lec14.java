@@ -33,7 +33,7 @@ public class Lec14 extends JFrame{
 		Timer timer, timer_game;
 		Image image;
 		int my_x, my_y;
-		int my_life = 5;
+		int my_life = 3;
 		int mouse_x, mouse_y;
 		int start_x, start_y;
 		int init_x=100, init_y=375;
@@ -198,7 +198,7 @@ public class Lec14 extends JFrame{
 		}
 
 		private void moveRock(){
-			rock_velo = 10 + rock_count[play_num]/5;
+			rock_velo = 10 + rock_count[play_num]/3;
 			rock_x -= rock_velo;
 			//speed up according to rock avoided
 			if (rock_x + rock_width < 0) {
@@ -275,7 +275,7 @@ public class Lec14 extends JFrame{
 
 				//draw fire
 				if(fire_flag == 1){
-					g.drawImage(fire, fire_x, fire_y, 75, 40, this);
+					g.drawImage(fire, fire_x, fire_y, 75, 40, this);//fire75x40
 				}
 			}
 		}
@@ -346,17 +346,15 @@ public class Lec14 extends JFrame{
 						game_over.setVisible(true);
 						score.setVisible(true);
 
-						my_life = 5;//重新開始時的生命
+						my_life = 3;//重新開始時的生命
 						play_num += 1;
 
 					}
 				}
 				if(checkHitStar()){
-					fire_flag = 0;
+//					fire_flag = 0;
 					star_x = 800;
-					if(my_life < 5){
-						my_life += 1;
-					}
+					my_life += 1;
 				}
 
 				repaint();
