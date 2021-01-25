@@ -35,7 +35,7 @@ public class Lec14 extends JFrame{
 		new Lec14();
 	}
 
-	public class MyJPanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
+	public static class MyJPanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 		Timer timer, timer_game;
 		Image image;
 		int my_x, my_y;
@@ -71,11 +71,6 @@ public class Lec14 extends JFrame{
 		int star_size = 50; //50x50star
 		int star_velo = 15;
 
-//		int pig_life = 3;
-//		int pig_x = 800;
-//		int pig_velo = 5;
-//		int pig_size = 200;
-
 		int fire_x = 100;
 		int fire_y = 50;
 		int fire_flag = 0;
@@ -83,7 +78,7 @@ public class Lec14 extends JFrame{
 		int rock_x = 800;
 		int rock_width = 60;
 		int rock_height = 40;
-		int rock_count[] = {0, 0, 0};
+		int[] rock_count = {0, 0, 0};
 		int rock_velo = 10;
 
 		public MyJPanel(){
@@ -157,44 +152,38 @@ public class Lec14 extends JFrame{
 
 			//pause button
 			pause_button = new JButton("PAUSE");
-			pause_button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					Graphics g = getGraphics();
-					g.setColor(Color.black);
-					if (pause_flag == 0) {
-						//PAUSE
-						pause_flag = 1;
-						pause_button.setText("RESUME");
-					} else if (pause_flag == 1) {
-						//PLAY
-						pause_flag = 0;
-						pause_button.setText("PAUSE");
-					}
+			pause_button.addActionListener(e -> {
+				Graphics g = getGraphics();
+				g.setColor(Color.black);
+				if (pause_flag == 0) {
+					//PAUSE
+					pause_flag = 1;
+					pause_button.setText("RESUME");
+				} else if (pause_flag == 1) {
+					//PLAY
+					pause_flag = 0;
+					pause_button.setText("PAUSE");
 				}
 			});
 			add(pause_button);
 
 			//restart button
 			restart_button = new JButton("RESTART");
-			restart_button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (game_stage == 0) {
-						if (pause_flag == 1) {
-							//PAUSE condition, restart
-							pause_flag = 0;
-							pause_button.setText("PAUSE");
-						}
-						my_x = init_x;
-						my_y = init_y;
-						t = 0.0;
-						grab_flag = 0;
-						timer.stop();
-						repaint();
+			restart_button.addActionListener(e -> {
+				if (game_stage == 0) {
+					if (pause_flag == 1) {
+						//PAUSE condition, restart
+						pause_flag = 0;
+						pause_button.setText("PAUSE");
 					}
-
+					my_x = init_x;
+					my_y = init_y;
+					t = 0.0;
+					grab_flag = 0;
+					timer.stop();
+					repaint();
 				}
+
 			});
 			add(restart_button);
 
@@ -234,7 +223,6 @@ public class Lec14 extends JFrame{
 			Rectangle my_rect = new Rectangle(my_x, my_y, 50, 50);//50x50bird
 			Rectangle rock_rect = new Rectangle(rock_x, (400-rock_height), rock_width, rock_height);
 			return my_rect.intersects(rock_rect);
-//			return rock_x < 90 && (my_y + 50 > 400 - rock_height);
 		}
 
 		private void moveRock(){
@@ -259,7 +247,7 @@ public class Lec14 extends JFrame{
 
 		private void gravityBird(){
 			if(my_y < 350){
-				my_y += 2.5;
+				my_y += 2.5 + (int)(rock_count[play_num]/10);
 				if(my_y > 350){
 					my_y = 350;
 				}
@@ -526,10 +514,8 @@ public class Lec14 extends JFrame{
 					break;
 
 				default:
-					switch (keychar){
-						case 'f':
-							activateFire();
-							break;
+					if (keychar == 'f') {
+						activateFire();
 					}
 					break;
 //				case KeyEvent.VK_X:
@@ -543,7 +529,7 @@ public class Lec14 extends JFrame{
 		public void keyTyped(KeyEvent e){
 		}
 
-		class Quick{//used for quick sort (Lec. 5)
+		static class Quick{//used for quick sort (Lec. 5)
 			public int compareCounter;
 			public int swapCounter;
 			public int swapIndex;
@@ -585,16 +571,5 @@ public class Lec14 extends JFrame{
 
 			}
 		}
-
-		class MyThread extends Thread {
-			public void run(){
-				try {
-					sleep(10000);
-					System.exit(0);
-				} catch(InterruptedException e){
-				}
-			}
-		}
-
 	}
 }
