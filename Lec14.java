@@ -57,6 +57,7 @@ public class Lec14 extends JFrame{
 
 		int game_stage = 0;
 		int play_num = 0;
+		Boolean gameover_flag = false;
 
 		Image star, pig, rock, fire, heart;
 
@@ -112,6 +113,7 @@ public class Lec14 extends JFrame{
 					"Change something: (2) restart button\n" +
 					"Change something: (3) skip button\n" +
 					"Change something: (4) main game following\n" +
+					"Functionalities: instructers" +
 					"Functionalities related to Lec5: sort final score\n" +
 					"Click anywhere or drag the bird to start the game");
 			explain_before.setBounds(100, 100, 600, 300);
@@ -122,9 +124,10 @@ public class Lec14 extends JFrame{
 					"(Press UP/DOWN to move upwards/downwards too.)\n" +
 					"Press F to fire.\n" +
 					"Avoid as many rocks as you can.\n" +
-					"Shoot (F) at the star to heal 1 heart." +
+					"Shoot (F) at the star to heal 1 heart.\n" +
+					"Remember to heal up!" +
 					"You have three tries, 3 hp each game.\n" +
-					"Press ENTER to start the game!");
+					"--------Press ENTER to start the game!--------");
 			explain_after.setBounds(100, 100, 600, 300);
 			add(explain_after);
 			explain_after.setVisible(false);
@@ -230,7 +233,7 @@ public class Lec14 extends JFrame{
 		}
 
 		private void moveRock(){
-			rock_velo = 10 + rock_count[play_num]/2;
+			rock_velo = 10 + (int)(rock_count[play_num]/1.5);
 			rock_x -= rock_velo;
 			//speed up according to #rock avoided
 			if (rock_x + rock_width < 0) {
@@ -245,7 +248,7 @@ public class Lec14 extends JFrame{
 
 			star_x -= star_velo*rand;
 			if (star_x+star_size < 0) {
-				star_x = 800;
+				star_x = 1200;
 			}
 		}
 
@@ -375,6 +378,7 @@ public class Lec14 extends JFrame{
 					my_life -= 1;
 					if (my_life == 0){
 						if(play_num == 2){
+							gameover_flag = true;
 							score.setText("\nGame over." +
 									"\nGame 1: " + rock_count[0] +" rocks!"+
 									"\nGame 2: " + rock_count[1] +" rocks!"+
@@ -392,10 +396,9 @@ public class Lec14 extends JFrame{
 							score_final.setVisible(true);
 
 							System.out.println("===== Game Over =====");
-							play_num = 10;
 							timer_game.stop();
-							Thread t1 = new MyThread();
-							t1.start();
+//							Thread t1 = new MyThread();
+//							t1.start();
 
 
 						}
@@ -480,6 +483,7 @@ public class Lec14 extends JFrame{
 			char keychar = me.getKeyChar();
 			switch (keycode) {
 				case KeyEvent.VK_ENTER:
+
 					if(game_stage == 1){
 						timer_game = new Timer(25, this);
 						timer_game.start();
@@ -487,9 +491,9 @@ public class Lec14 extends JFrame{
 						game_over.setVisible(false);
 						score.setVisible(false);
 
-//						if(play_num == 10){
-//							System.exit(0);
-//						}
+						if(gameover_flag){
+							System.exit(0);
+						}
 						break;
 
 					}
