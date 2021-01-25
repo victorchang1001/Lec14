@@ -14,6 +14,11 @@ import java.util.Random;
 
 public class Lec14 extends JFrame{
 	
+	// # Lec14
+	// Javaプログラミング
+	// Changed something: Added JButtons
+	// Functionalities: Instructers, sort, random.
+	
 	public Lec14(){
 		setSize(800,500);
 		setTitle("1W19CF03: HAngry Birds...");
